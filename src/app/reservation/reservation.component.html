@@ -1,0 +1,44 @@
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+<div *ngIf="dataLoaded; else loading" >
+<div *ngIf = "reservation">
+    <br>
+    <div class="card"> 
+        <h5 class="card-header">Rezerwacja lotu</h5>
+        <div class="card-body">
+            <h5 class="card-title"><i class="fa fa-plane" aria-hidden="true"></i> {{reservation.departureAirports}}  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+             <i class="fa fa-arrow-right" aria-hidden="true">  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  </i>
+            <i class="fa fa-plane" aria-hidden="true"></i> {{reservation.arrivalAirports}} </h5>
+             <p class="card-text"> {{reservation.departureDate}} &nbsp;&nbsp; <i class="fa fa-arrow-right" aria-hidden="true">  &nbsp;&nbsp; </i> {{reservation.arrivalDate}}</p>
+        </div>
+    </div>
+    <br>
+    <div *ngIf="isSomethingClicked" class="alert alert-danger" role="alert">
+        Wybierz przynajmniej jedno miejsce.
+     </div>
+    <h5 >Wybierz miejsca</h5>
+        <br>
+    <div class="card-group">
+        <div *ngFor = "let seat of reservation.seats">
+                <div class="card" style="width: 18rem;">
+                    <div style="height:180px;">
+                    <div class="card-body">
+                        <h5 class="card-title">Miejsce: {{seat.seatNumber}}</h5>
+                        <p class="card-text">Cena: {{seat.price}}</p>
+                        <p class="card-text">Klasa: {{seat.classType}}</p>
+                        <input *ngIf="seat.isAvailable" type="checkbox" name="seat{{seat.id}}"  [(ngModel)]="seat.checked">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <button class="btn btn-primary pull-right" type="button"  (click)="sendCheckedSeats()">Rezerwuj</button>
+</div>
+</div>
+<ng-template #loading>
+    <div class="text-center">
+      <div class="spinner-border" role="status">
+        <span class="sr-only"></span>
+      </div>
+    </div>
+  </ng-template>

@@ -1,0 +1,169 @@
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+ <div *ngIf="dataLoaded; else loading" >
+  <div *ngIf="!isLogged" class="alert alert-danger" role="alert">
+    By dokonać rezerwacji musisz być
+    <a [routerLink]="['/login']">zalogowany</a>
+</div>
+<div *ngIf="isNotAuthorized" class="alert alert-danger" role="alert">
+  Nie masz uprawnień do dokonania rezerwacji. Nie jesteś rezerwującym.
+</div>
+  <form [formGroup]="dataForms" >
+    <div class="form-group">
+      <!-- <label for="date">Data lotu:&nbsp;</label>
+      <input type="date" class="form-control"  id="date" formControlName="date" > -->
+      <mat-form-field>
+        <input matInput  [matDatepicker]="datePicker" placeholder="Wybierz date"  formControlName="date">
+        <mat-datepicker-toggle [for]="datePicker" matSuffix></mat-datepicker-toggle>
+        <mat-datepicker #datePicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <div class="form-group">
+        <label for="inputDepartureAirports">Lotnisko odlotu:</label>
+        <select id="inputDepartureAirports" class="form-control"  id="inputDepartureAirports" formControlName="inputDepartureAirports">
+          <option *ngFor="let airports of listOfDepartureAirports"> {{airports}} </option>
+        </select>
+      </div>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <div class="form-group">
+        <label for="inputArrivalAirports">Lotnisko przylotu:</label>
+        <select id="inputArrivalAirports" class="form-control"  id="inputArrivalAirports" formControlName="inputArrivalAirports">
+          <option *ngFor="let airports of listOfArrivalAirports"> {{airports}} </option>
+        </select>
+      </div>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <div form-item class="form-group ">
+        <label for="minPrice" class="sr-only">cena minimalna:</label>
+        <input type="number" class="form-control" id="minPrice" formControlName="minPrice">
+      </div>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <div form-item class="form-group ">
+        <label for="maxPrice" class="sr-only">cena maksymalna:</label>
+        <input type="number" class="form-control" id="maxPrice" formControlName="maxPrice">
+      </div>
+ </form>
+<table *ngIf="!isManager" class= "table table-striped">
+  <thead>
+    <tr>
+      <th>Lotniska</th>
+      <th>Data przylotu i odlotu</th>
+      <th>Cena</th>
+      <th>Dostępność</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor = "let flight of filteredListOfFlights"  style="height:60px;">
+        <td> <i class="fa fa-plane" aria-hidden="true"></i> {{flight.departureAirports}}  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <i class="fa fa-arrow-right" aria-hidden="true">  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  </i>
+          <i class="fa fa-plane" aria-hidden="true"></i> {{flight.arrivalAirports}}  </td>
+        <td> {{flight.departureDate}} &nbsp;&nbsp; <i class="fa fa-arrow-right" aria-hidden="true">  &nbsp;&nbsp; </i> {{flight.arrivalDate}}</td>
+        <td>od {{flight.minPrice}}</td>
+        <td>{{flight.flightStatus}}</td>
+        <td ><button *ngIf="flight.isReservationActive" (click)="reservationClick(flight.id)" class="btn btn-primary" >
+          Rezerwuj
+        </button></td>
+    </tr>
+  </tbody>
+</table>
+<table *ngIf="isManager" class= "table table-striped">
+  <thead>
+    <tr>
+      <th>Lotniska</th>
+      <th>Data przylotu i odlotu</th>
+      <th>Cena</th>
+      <th>Status</th>
+      <th>Zmień status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor = "let flight of filteredListOfAllFlights"  style="height:60px;">
+        <td> <i class="fa fa-plane" aria-hidden="true"></i> {{flight.flightDto.departureAirports}}  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <i class="fa fa-arrow-right" aria-hidden="true">  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  </i>
+          <i class="fa fa-plane" aria-hidden="true"></i> {{flight.flightDto.arrivalAirports}}  </td>
+        <td> {{flight.flightDto.departureDate}} &nbsp;&nbsp; <i class="fa fa-arrow-right" aria-hidden="true">  &nbsp;&nbsp; </i> {{flight.flightDto.arrivalDate}}</td>
+        <td>od {{flight.flightDto.minPrice}}</td>
+        <td>{{flight.flightDto.flightStatus}}</td>
+        <td> 
+          <div class="btn-group" role="group" aria-label="Basic example">
+              <button type="button" class="btn btn-secondary" *ngFor="let status of flight.flightStatuses" (click)="flightStatusChangeClick(flight.flightDto.id, status)"> {{status}} </button>
+          </div>
+        </td>
+        <!-- (click)="flightEditionClick(flight.flightDto.id)" -->
+        <td><button *ngIf="flight.flightDto.isNewStatus" (click)="editionClick(flight.flightDto.id)" class="btn btn-primary" >
+          Edytuj
+        </button></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<ng-template #loading>
+  <div class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="sr-only"></span>
+    </div>
+  </div>
+</ng-template>
+
+
+<!-- <div *ngIf="dataLoaded; else loading" class="container main-container"> -->
+    <!-- <div class="row">
+        <div class="col">
+            <form [formGroup]="dataForms">
+                <div form-item class="form-group col-10">
+                    <label for="minPrice" class="sr-only">cena minimalna:</label>
+                    <input type="number" class="form-control" id="minPrice" formControlName="minPrice">
+                </div>
+                <div form-item class="form-group col-10">
+                    <label for="maxPrice" class="sr-only">cena maksymalna:</label>
+                    <input type="number" class="form-control" id="maxPrice" formControlName="maxPrice">
+                </div>
+                <div form-item class="form-group col-10">
+                    <input type="date" id="arrivalDate" name="arrivalDate">
+                </div>
+                
+                </form>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Dropdown
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenu3">
+                      <button class="dropdown-item" type="button">Action</button>
+                      <button class="dropdown-item" type="button">Another action</button>
+                      <button class="dropdown-item" type="button">Something else here</button>
+                    </div>
+                  </div>
+                  <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Dropdown
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenu5">
+                      <button class="dropdown-item" type="button">Action</button>
+                      <button class="dropdown-item" type="button">Another action</button>
+                      <button class="dropdown-item" type="button">Something else here</button>
+                    </div>
+                  </div> -->
+                  <!-- <mat-form-field appearance="fill">
+                    <mat-label>Choose a date</mat-label>
+                    <input matInput [matDatepicker]="picker">
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                  </mat-form-field> -->
+                  
+        <!-- </div> -->
+        <!-- <div class="col-10"> -->
+            <!-- <div *ngFor="let flight of filteredListOfFlights" class="card flight-card"> -->
+                <!-- <div class="card-body">
+                    <h5 class="card-title">Title->Title </h5>
+                    <h6 class="card-subtitle mb-2 text-muted">12.10.2020 15:35 -> 12.10.2020 16:55</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">20 zł</h6>
+                    <p class="card-text">STATUS</p>
+                    <a class="btn btn-primary" [routerLink]=" ">Rezerwuj</a>
+                </div> -->
+            <!-- </div> -->
+        <!-- </div>
+    </div> -->
+<!-- </div> -->
+<!-- <ng-template #loading>
+    Ładowanie...
+</ng-template> -->
+
